@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rješavanje nelinearnih jednadžbi</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            background-color: #cfe6fd;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        #solutionDisplay {
+            margin-top: 20px;
+        }
+        #plot {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+        }
+        th, td {
+            text-align: center;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .theme-toggle {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#"><i class="fas fa-calculator"></i> Kalkulator za rješavanje nelinearnih jednadžbi</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+               
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="modal" data-target="#aboutModal">O kalkulatoru</a>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="text-center">Rješavanje nelinearnih jednadžbi</h1>
+        <p class="text-center">Kalkulator za rješavnje nelinearnih jednadžbi s jednom nepoznanicom numeričkim metodama.</p>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form id="equationForm">
+                    <div class="form-group">
+                        <label for="equationInput">Jednadžba:</label>
+                        <input type="text" class="form-control" id="equationInput" placeholder="Unesite jednadžbu, npr. 2x^3-3">
+                    </div>
+                    <div class="form-group" id="intervalGroup">
+                        <label for="intervalInput">Interval:</label>
+                        <input type="text" class="form-control" id="intervalInput" placeholder="Unesite interval, npr. 0,3">
+                    </div>
+                    <div class="form-group" id="initialGuessGroup" style="display:none;">
+                        <label for="initialGuessInput">Početna točka:</label>
+                        <input type="number" step="any" class="form-control" id="initialGuessInput" placeholder="Unesite početnu pretpostavku, npr. 1">
+                    </div>
+                    <div class="form-group">
+                        <label for="toleranceInput">Točnost:</label>
+                        <input type="number" step="any" class="form-control" id="toleranceInput" placeholder="Unesite točnost, npr. 0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="methodSelect">Metoda:</label>
+                        <select class="form-control" id="methodSelect">
+                            <option value="bisection">Metoda bisekcije</option>
+                            <option value="newton">Newtonova metoda</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">RIJEŠI JEDNADŽBU</button>
+                </form>
+                <div id="solutionDisplay"></div>
+                <div id="plot"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="aboutModalLabel">O kalkulatoru</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <p>Pomoću ovog kalkulatora se rješavaju nelinearnie jednadžbe numeričkim metodama kao što su metoda bisekcije i Newtonova metoda.</p>
+                <p>U polje "Jednadžba" se unosi jednadžba bez oznake f(x)= ili =0. Na primjer, za jednadžbu f(x)=2x^3-3=0 upiše se samo 2x^3-3.</p>
+                <p>Interval se unosi u obliku a,b gdje su a i b krajevi intervala u kojem se traži rješenje.</p>
+                <p>Točnost određuje koliko točno želite rješenje. Što je manja vrijednost, to je veća točnost, ali i veći broj iteracija potreban za izračun.</p>
+                <p>Kad se izabere Newtonova metoda, umjesto intervala se pojavi polje za unos početne točke.</p>
+                <p>Kalkulator će prikazati detaljne korake izračuna, graf funkcije te približno rješenje koje je pronađeno.</p>
+                <hr>
+                <h5>Upute za unos specifičnih jednadžbi</h5>
+                <ul>
+                    <li><strong>Polinomi:</strong> Za unos polinoma koristite standardnu sintaksu, npr. <code>2x^3 - 4x + 6</code>.</li>
+                    <li><strong>Trigonometrijske funkcije:</strong> Trigonometrijske funkcije se unose kao <code>sin(x)</code>, <code>cos(x)</code>, <code>tan(x)</code>, itd. Na primjer, <code>sin(x) - 0.5</code>.</li>
+                    <li><strong>Eksponencijalne funkcije:</strong> Eksponencijalne funkcije unose se kao <code>exp(x)</code>. Na primjer, <code>exp(x) - 2</code>.</li>
+                    <li><strong>Logaritamske funkcije:</strong> Logaritmi se unose kao <code>log(x)</code> za prirodni logaritam ili <code>log10(x)</code> za dekadski logaritam. Na primjer, <code>log(x) - 1</code>.</li>
+                    <li><strong>Kvadratni korijen:</strong> Kvadratni korijen se unosi kao <code>sqrt(x)</code>. Na primjer, <code>sqrt(x) - 4</code>.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+    <footer class="text-center">
+        <p>&copy; 2024 Kalkulator za rješavanje nelinearnih jednadžbi. Napravio - Nikola Minić.</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
